@@ -19,7 +19,7 @@ func (c CommandLine) IsEmpty() bool {
 	if len(c) == 0 {
 		return true
 	}
-	if len(c) == 1 && c[0] == "" {
+	if len(c) == 1 && strings.TrimSpace(c[0]) == "" {
 		return true
 	}
 	return false
@@ -67,6 +67,7 @@ func main() {
 		h, ok := commandMap[cmd.Name()]
 		if !ok {
 			fmt.Printf("%s: command not found\n", cmd.Name())
+			continue
 		}
 		if err = h(cmd); err != nil {
 			if errors.Is(err, io.EOF) {
