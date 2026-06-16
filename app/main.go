@@ -14,6 +14,16 @@ type CommandLine []string
 func NewCommandLine(line string) CommandLine {
 	return strings.Split(strings.Trim(line, "\n"), " ")
 }
+
+func (c CommandLine) IsEmpty() bool {
+	if len(c) == 0 {
+		return true
+	}
+	if len(c) == 1 && c[0] == "" {
+		return true
+	}
+	return false
+}
 func (c CommandLine) ArgumentLine() string {
 	if len(c) < 1 {
 		panic("no arguments")
@@ -51,6 +61,9 @@ func main() {
 			return
 		}
 		cmd = NewCommandLine(line)
+		if cmd.IsEmpty() {
+			continue
+		}
 		h, ok := commandMap[cmd.Name()]
 		if !ok {
 			fmt.Printf("%s: command not found\n", cmd.Name())
