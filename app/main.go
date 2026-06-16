@@ -64,6 +64,9 @@ func main() {
 		if cmd.IsEmpty() {
 			continue
 		}
+		if cmd.Name() == "" {
+			continue
+		}
 		h, ok := commandMap[cmd.Name()]
 		if !ok {
 			fmt.Printf("%s: command not found\n", cmd.Name())
