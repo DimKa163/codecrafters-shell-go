@@ -28,12 +28,16 @@ func (c CommandLine) Name() string {
 	return c[0]
 }
 
+type CommandHandler func(CommandLine) error
+
 const (
 	ExitCommand = "exit"
 	EchoCommand = "echo"
+	TypeCommand = "type"
 )
 
 func main() {
+	commandMap := initCommandMap()
 	reader := bufio.NewReader(os.Stdin)
 	var cmd CommandLine
 	for {
@@ -47,13 +51,35 @@ func main() {
 			return
 		}
 		cmd = NewCommandLine(line)
-		switch cmd.Name() {
-		case ExitCommand:
-			return
-		case EchoCommand:
-			fmt.Println(cmd.ArgumentLine())
-		default:
+		h, ok := commandMap[cmd.Name()]
+		if !ok {
 			fmt.Printf("%s: command not found\n", cmd.Name())
 		}
+		if err = h(cmd); err != nil {
+			if errors.Is(err, io.EOF) {
+				return
+			}
+			fmt.Println(err)
+		}
 	}
+}
+
+func initCommandMap() map[string]CommandHandler {
+	m := make(map[string]CommandHandler)
+	m[EchoCommand] = func(cmd CommandLine) error {
+		fmt.Println(cmd.ArgumentLine())
+		return nil
+	}
+	m[ExitCommand] = func(cmd CommandLine) error {
+		return io.EOF
+	}
+	m[TypeCommand] = func(cmd CommandLine) error {
+		_, ok := m[cmd.ArgumentLine()]
+		if !ok {
+			return fmt.Errorf("%s: not found", cmd.ArgumentLine())
+		}
+		fmt.Printf("%s is a shell builtin\n", cmd.ArgumentLine())
+		return nil
+	}
+	return m
 }
