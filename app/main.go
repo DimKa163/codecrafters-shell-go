@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -92,11 +93,18 @@ func initCommandMap() map[string]CommandHandler {
 	}
 	m[TypeCommand] = func(cmd CommandLine) error {
 		_, ok := m[cmd.ArgumentLine()]
-		if !ok {
+		if ok {
+			fmt.Printf("%s is a shell builtin\n", cmd.ArgumentLine())
+			return nil
+		}
+		var err error
+		var path string
+		if path, err = exec.LookPath(cmd.ArgumentLine()); err != nil {
 			return fmt.Errorf("%s: not found", cmd.ArgumentLine())
 		}
-		fmt.Printf("%s is a shell builtin\n", cmd.ArgumentLine())
+		fmt.Printf("%s is %s\n", cmd.ArgumentLine(), path)
 		return nil
+
 	}
 	return m
 }
