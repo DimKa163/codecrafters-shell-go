@@ -51,8 +51,8 @@ func (d *dipatcher) execExternalProgram(ctx context.Context, name string, args .
 		}
 		return fmt.Errorf("%s: not found", name)
 	}
-	if err = exec.CommandContext(ctx, path, args...).Run(); err != nil {
-		return err
-	}
-	return nil
+	cmd := exec.CommandContext(ctx, name, args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
