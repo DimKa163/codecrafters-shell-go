@@ -20,6 +20,7 @@ func NewDispatcher() *dipatcher {
 	cmd[commands.EchoCommand] = commands.Echo
 	cmd[commands.ExitCommand] = commands.Exit
 	cmd[commands.TypeCommand] = commands.Type
+	cmd[commands.PwdCommand] = commands.Pwd
 	return &dipatcher{cmd: cmd, reader: *bufio.NewReader(os.Stdin)}
 }
 
