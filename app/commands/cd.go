@@ -19,10 +19,10 @@ func Cd(ctx context.Context, cmd CommandLine) error {
 		}
 		arg = strings.Replace(arg, "~", hmDir, 1)
 	}
-	if err := os.Chdir(cmd.Args()[0]); err != nil {
+	if err := os.Chdir(arg); err != nil {
 		var pathErr *os.PathError
 		if errors.As(err, &pathErr) && pathErr.Op == "chdir" {
-			return fmt.Errorf("cd: %s: No such file or directory", cmd.Args()[0])
+			return fmt.Errorf("cd: %s: No such file or directory", arg)
 		}
 		return err
 	}
