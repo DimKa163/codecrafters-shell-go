@@ -16,11 +16,12 @@ type dipatcher struct {
 }
 
 func NewDispatcher() *dipatcher {
-	cmd := make(map[string]commands.CommandHandler)
+	cmd := make(map[string]commands.CommandHandler, 4)
 	cmd[commands.EchoCommand] = commands.Echo
 	cmd[commands.ExitCommand] = commands.Exit
 	cmd[commands.TypeCommand] = commands.Type
 	cmd[commands.PwdCommand] = commands.Pwd
+	cmd[commands.CdCommand] = commands.Cd
 	return &dipatcher{cmd: cmd, reader: *bufio.NewReader(os.Stdin)}
 }
 
