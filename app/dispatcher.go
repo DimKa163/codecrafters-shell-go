@@ -1,0 +1,58 @@
+package main
+
+import (
+	"bufio"
+	"context"
+	"errors"
+	"fmt"
+	"github.com/codecrafters-io/shell-starter-go/app/commands"
+	"os"
+	"os/exec"
+)
+
+type dipatcher struct {
+	cmd    map[string]commands.CommandHandler
+	reader bufio.Reader
+}
+
+func NewDispatcher() *dipatcher {
+	cmd := make(map[string]commands.CommandHandler)
+	cmd[commands.EchoCommand] = commands.Echo
+	cmd[commands.ExitCommand] = commands.Exit
+	cmd[commands.TypeCommand] = commands.Type
+	return &dipatcher{cmd: cmd, reader: *bufio.NewReader(os.Stdin)}
+}
+
+func (d *dipatcher) Execute(ctx context.Context) error {
+	fmt.Print("$ ")
+	line, err := d.reader.ReadString('\n')
+	if err != nil {
+		return err
+	}
+
+	cmd := commands.NewCommandLine(line)
+	if cmd.IsEmpty() || cmd.Name() == "" {
+		return nil
+	}
+
+	h, ok := d.cmd[cmd.Name()]
+	if ok {
+		return h(context.WithValue(ctx, commands.CommandStorageKey, d.cmd), cmd)
+	}
+	return d.execExternalProgram(ctx, cmd.Name(), cmd.Args()...)
+}
+
+func (d *dipatcher) execExternalProgram(ctx context.Context, name string, args ...string) error {
+	var path string
+	var err error
+	if path, err = exec.LookPath(name); err != nil {
+		if !errors.Is(err, exec.ErrNotFound) {
+			return err
+		}
+		return fmt.Errorf("%s: not found", name)
+	}
+	if err = exec.CommandContext(ctx, path, args...).Run(); err != nil {
+		return err
+	}
+	return nil
+}
