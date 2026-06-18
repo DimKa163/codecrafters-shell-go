@@ -43,15 +43,14 @@ func (d *dipatcher) Execute(ctx context.Context) error {
 }
 
 func (d *dipatcher) execExternalProgram(ctx context.Context, name string, args ...string) error {
-	var path string
 	var err error
-	if path, err = exec.LookPath(name); err != nil {
+	if _, err = exec.LookPath(name); err != nil {
 		if !errors.Is(err, exec.ErrNotFound) {
 			return err
 		}
 		return fmt.Errorf("%s: not found", name)
 	}
-	cmd := exec.CommandContext(ctx, path, args...)
+	cmd := exec.CommandContext(ctx, name, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
