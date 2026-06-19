@@ -2,17 +2,20 @@ package commands
 
 import (
 	"context"
+	"github.com/codecrafters-io/shell-starter-go/app/commands/lex"
 	"strings"
-	"unicode"
 )
 
 const CommandStorageKey = "coomandstorage"
 
 type CommandLine []string
 
-func NewCommandLine(line string) CommandLine {
-	result := make(CommandLine, 0, len(line))
-	var quoteOpen bool
+func NewCommandLine(lexer *lex.Lexer) CommandLine {
+	result := make(CommandLine, 0)
+	for p := range lexer.All() {
+		result = append(result, p)
+	}
+	/*var quoteOpen bool
 	var sb strings.Builder
 	for _, r := range line {
 		if quoteOpen {
@@ -34,7 +37,7 @@ func NewCommandLine(line string) CommandLine {
 				sb.WriteRune(r)
 			}
 		}
-	}
+	}*/
 	return result
 }
 

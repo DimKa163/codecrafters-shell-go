@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/codecrafters-io/shell-starter-go/app/commands"
+	"github.com/codecrafters-io/shell-starter-go/app/commands/lex"
 	"os"
 	"os/exec"
 )
@@ -32,7 +33,7 @@ func (d *dipatcher) Execute(ctx context.Context) error {
 		return err
 	}
 
-	cmd := commands.NewCommandLine(line)
+	cmd := commands.NewCommandLine(lex.NewLexer(line))
 	if cmd.IsEmpty() || cmd.Name() == "" {
 		return nil
 	}
