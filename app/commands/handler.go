@@ -9,35 +9,16 @@ import (
 const CommandStorageKey = "coomandstorage"
 
 type CommandLine []string
+type Command struct {
+	command string
+	line    CommandLine
+}
 
 func NewCommandLine(lexer *lex.Lexer) CommandLine {
 	result := make(CommandLine, 0)
 	for p := range lexer.All() {
-		result = append(result, p)
+		result = append(result, p.Value)
 	}
-	/*var quoteOpen bool
-	var sb strings.Builder
-	for _, r := range line {
-		if quoteOpen {
-			if isQuote(r) {
-				quoteOpen = false
-			} else {
-				sb.WriteRune(r)
-			}
-		} else {
-			if unicode.IsSpace(r) {
-				part := sb.String()
-				if strings.TrimSpace(part) != "" {
-					result = append(result, sb.String())
-				}
-				sb.Reset()
-			} else if isQuote(r) {
-				quoteOpen = true
-			} else {
-				sb.WriteRune(r)
-			}
-		}
-	}*/
 	return result
 }
 
