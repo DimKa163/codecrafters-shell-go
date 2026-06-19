@@ -18,48 +18,49 @@ type Token struct {
 	Type  TokenType
 }
 type Lexer struct {
-	input []rune
+	runes []rune
 }
 
 func NewLexer(input string) *Lexer {
-	return &Lexer{input: []rune(input)}
+	return &Lexer{runes: []rune(input)}
 }
 
 func (l *Lexer) All() iter.Seq[Token] {
 	return func(yield func(Token) bool) {
 		var sb strings.Builder
-		q := false
-		dq := false
-		for _, r := range l.input {
-			if q {
-				if isQuote(r) {
-					q = false
-				} else {
-					sb.WriteRune(r)
+		var quote rune
+		var treatAsLiteral bool
+		for i := 0; i < len(l.runes); i++ {
+			ch := l.runes[i]
+			switch {
+			case treatAsLiteral:
+				sb.WriteRune(ch)
+				treatAsLiteral = false
+			case quote != 0:
+				if ch == quote {
+					quote = 0
+					continue
 				}
-			} else if dq {
-				if isDoubleQuote(r) {
-					dq = false
-				} else {
-					sb.WriteRune(r)
-				}
-			} else {
-				if unicode.IsSpace(r) {
-					p := sb.String()
-					if strings.TrimSpace(p) != "" {
-						if !yield(Token{Value: p, Type: TokenTypeWord}) {
-							continue
-						}
-						sb.Reset()
+				sb.WriteRune(ch)
+			case unicode.IsSpace(ch):
+				if sb.Len() > 0 {
+					if !yield(Token{Value: sb.String(), Type: TokenTypeWord}) {
+						return
 					}
-				} else if isQuote(r) {
-					q = true
-				} else if isDoubleQuote(r) {
-					dq = true
-				} else {
-					sb.WriteRune(r)
+					sb.Reset()
 				}
+			case isQuote(ch):
+				quote = '\''
+			case isDoubleQuote(ch):
+				quote = '"'
+			case isSlash(ch):
+				treatAsLiteral = true
+			default:
+				sb.WriteRune(ch)
 			}
+		}
+		if sb.Len() > 0 {
+			yield(Token{Value: sb.String(), Type: TokenTypeWord})
 		}
 	}
 }
@@ -70,4 +71,8 @@ func isQuote(r rune) bool {
 
 func isDoubleQuote(r rune) bool {
 	return r == '"'
+}
+
+func isSlash(r rune) bool {
+	return r == '\\'
 }
