@@ -36,6 +36,8 @@ func (l *Lexer) All() iter.Seq[Token] {
 			case treatAsLiteral:
 				sb.WriteRune(ch)
 				treatAsLiteral = false
+			case isSlash(ch):
+				treatAsLiteral = true
 			case quote != 0:
 				if ch == quote {
 					quote = 0
@@ -53,8 +55,6 @@ func (l *Lexer) All() iter.Seq[Token] {
 				quote = '\''
 			case isDoubleQuote(ch):
 				quote = '"'
-			case isSlash(ch):
-				treatAsLiteral = true
 			default:
 				sb.WriteRune(ch)
 			}
