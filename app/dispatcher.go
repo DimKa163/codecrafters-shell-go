@@ -81,7 +81,7 @@ func (d *dipatcher) Execute(ctx context.Context) error {
 		}
 	}
 	d.shell.SetStdout(out)
-	d.shell.SetStderr(errOut)
+	d.shell.SetStderr(out)
 	if d.shell.Check(cmdName) {
 		if err = d.shell.Exec(ctx, cmdName, args...); err != nil {
 			return err
@@ -89,6 +89,8 @@ func (d *dipatcher) Execute(ctx context.Context) error {
 		return nil
 	}
 
-	_ = d.shell.ExecExternalProgram(ctx, cmdName, args...)
+	if err = d.shell.ExecExternalProgram(ctx, cmdName, args...); err != nil {
+
+	}
 	return nil
 }

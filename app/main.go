@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 )
 
@@ -15,7 +14,6 @@ func main() {
 			if errors.Is(err, io.EOF) {
 				return
 			}
-			fmt.Println(err)
 		}
 	}
 }
