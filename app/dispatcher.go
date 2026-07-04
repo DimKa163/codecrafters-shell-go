@@ -89,5 +89,6 @@ func (d *dipatcher) Execute(ctx context.Context) error {
 		return nil
 	}
 
-	return d.shell.ExecExternalProgram(ctx, cmdName, args...)
+	_ = d.shell.ExecExternalProgram(ctx, cmdName, args...)
+	return nil
 }
