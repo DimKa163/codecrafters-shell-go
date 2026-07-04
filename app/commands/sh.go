@@ -51,7 +51,10 @@ func (s *shell) ExecExternalProgram(ctx context.Context, name string, args ...st
 		if !errors.Is(err, exec.ErrNotFound) {
 			return err
 		}
-		return fmt.Errorf("%s: not found", name)
+		if _, err = s.Stderr.WriteString(fmt.Sprintf("%s: not found\n", name)); err != nil {
+			return err
+		}
+		return nil
 	}
 	cmd := exec.CommandContext(ctx, name, args...)
 	cmd.Stdout = s.Stdout
