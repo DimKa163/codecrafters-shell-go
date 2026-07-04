@@ -10,7 +10,9 @@ type TokenType int
 
 const (
 	TokenTypeWord TokenType = iota
-	TokenTypeExpression
+	TokenTypeName
+	TokenTypeRedirect
+	TokenTypeErrorRedirect
 )
 
 type Token struct {
@@ -27,6 +29,7 @@ func NewLexer(input string) *Lexer {
 
 func (l *Lexer) All() iter.Seq[Token] {
 	return func(yield func(Token) bool) {
+		var name bool
 		var sb strings.Builder
 		var quote rune
 		var treatAsLiteral bool
@@ -46,7 +49,22 @@ func (l *Lexer) All() iter.Seq[Token] {
 				sb.WriteRune(ch)
 			case unicode.IsSpace(ch):
 				if sb.Len() > 0 {
-					if !yield(Token{Value: sb.String(), Type: TokenTypeWord}) {
+					row := sb.String()
+					var token Token
+					switch row {
+					case "1>", ">":
+						token = Token{Type: TokenTypeRedirect, Value: row}
+					case "2>", "&>":
+						token = Token{Type: TokenTypeErrorRedirect, Value: row}
+					default:
+						if !name {
+							name = true
+							token = Token{Type: TokenTypeName, Value: row}
+						} else {
+							token = Token{Type: TokenTypeWord, Value: row}
+						}
+					}
+					if !yield(token) {
 						return
 					}
 					sb.Reset()

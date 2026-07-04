@@ -2,8 +2,9 @@ package commands
 
 import (
 	"context"
-	"github.com/codecrafters-io/shell-starter-go/app/commands/lex"
 	"strings"
+
+	"github.com/codecrafters-io/shell-starter-go/app/commands/lex"
 )
 
 const CommandStorageKey = "coomandstorage"
@@ -52,7 +53,12 @@ func (c CommandLine) Name() string {
 	return c[0]
 }
 
-type CommandHandler func(context.Context, CommandLine) error
+type InternalCommand interface {
+	Run() error
+}
+type (
+	CommandHandler func(context.Context, ...string) error
+)
 
 func isQuote(r rune) bool {
 	return r == '\'' || r == '"'
