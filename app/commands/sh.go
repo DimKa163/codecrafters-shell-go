@@ -85,7 +85,7 @@ func (s *shell) pwd(ctx context.Context, args ...string) error {
 	if err != nil {
 		return err
 	}
-	if _, err = os.Stdout.WriteString(dir); err != nil {
+	if _, err = os.Stdout.WriteString(fmt.Sprintf("%s\n", dir)); err != nil {
 		return err
 	}
 	return nil
@@ -108,7 +108,7 @@ func (s *shell) check(ctx context.Context, args ...string) error {
 		if !errors.Is(err, exec.ErrNotFound) {
 			return err
 		}
-		if _, err = s.Stderr.WriteString(fmt.Sprintf("%s: not found", args[0])); err != nil {
+		if _, err = s.Stderr.WriteString(fmt.Sprintf("%s: not found\n", args[0])); err != nil {
 			return err
 		}
 		return nil
