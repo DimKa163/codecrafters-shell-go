@@ -13,6 +13,8 @@ const (
 	TokenTypeName
 	TokenTypeRedirect
 	TokenTypeErrorRedirect
+	TokenTypeRedirectAppend
+	TokenTypeErrorRedirectAppend
 )
 
 type Token struct {
@@ -54,8 +56,12 @@ func (l *Lexer) All() iter.Seq[Token] {
 					switch row {
 					case "1>", ">":
 						token = Token{Type: TokenTypeRedirect, Value: row}
+					case "1>>", ">>":
+						token = Token{Type: TokenTypeRedirectAppend, Value: row}
 					case "2>", "&>":
 						token = Token{Type: TokenTypeErrorRedirect, Value: row}
+					case "2>>", "&>>":
+						token = Token{Type: TokenTypeErrorRedirectAppend, Value: row}
 					default:
 						if !name {
 							name = true

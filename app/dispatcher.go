@@ -49,33 +49,56 @@ func (d *dipatcher) Execute(ctx context.Context) error {
 	var cmdName string
 	args := make([]string, 0)
 
-	var setStdout bool
-	var setStderrout bool
+	var setStdoutOverwrite bool
+	var setStdoutAppend bool
+	var setStderroutOverwrite bool
+	var setStderroutAppend bool
 	for tkn := range lexer.All() {
 		switch {
-		case setStdout:
+		case setStdoutOverwrite:
 			if err = os.MkdirAll(filepath.Dir(tkn.Value), 0755); err != nil {
 				return err
 			}
-			out, err = os.OpenFile(tkn.Value, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+			out, err = os.OpenFile(tkn.Value, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 			if err != nil {
 				return err
 			}
-			setStdout = false
+			setStdoutOverwrite = false
 			closeOut = true
-		case setStderrout:
+		case setStdoutAppend:
+			if err = os.MkdirAll(filepath.Dir(tkn.Value), 0755); err != nil {
+				return err
+			}
+			out, err = os.OpenFile(tkn.Value, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+			if err != nil {
+				return err
+			}
+			setStdoutAppend = false
+			closeOut = true
+		case setStderroutOverwrite:
+			errOut, err = os.OpenFile(tkn.Value, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+			if err != nil {
+				return err
+			}
+			setStderroutOverwrite = false
+			closeErr = true
+		case setStderroutAppend:
 			errOut, err = os.OpenFile(tkn.Value, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 			if err != nil {
 				return err
 			}
-			setStderrout = false
+			setStderroutAppend = false
 			closeErr = true
 		case tkn.Type == lex.TokenTypeName:
 			cmdName = tkn.Value
 		case tkn.Type == lex.TokenTypeRedirect:
-			setStdout = true
+			setStdoutOverwrite = true
 		case tkn.Type == lex.TokenTypeErrorRedirect:
-			setStderrout = true
+			setStderroutOverwrite = true
+		case tkn.Type == lex.TokenTypeRedirectAppend:
+			setStdoutAppend = true
+		case tkn.Type == lex.TokenTypeErrorRedirectAppend:
+			setStderroutAppend = true
 		case tkn.Type == lex.TokenTypeWord:
 			args = append(args, tkn.Value)
 		}

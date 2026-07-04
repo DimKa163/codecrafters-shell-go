@@ -10,6 +10,14 @@ import (
 	"strings"
 )
 
+const (
+	EchoCommand = "echo"
+	ExitCommand = "exit"
+	TypeCommand = "type"
+	PwdCommand  = "pwd"
+	CdCommand   = "cd"
+)
+
 type shell struct {
 	cmd    map[string]CommandHandler
 	Stdout *os.File
