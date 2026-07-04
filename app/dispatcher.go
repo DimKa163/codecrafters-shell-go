@@ -81,7 +81,7 @@ func (d *dipatcher) Execute(ctx context.Context) error {
 		}
 	}
 	d.shell.SetStdout(out)
-	d.shell.SetStderr(out)
+	d.shell.SetStderr(errOut)
 	if d.shell.Check(cmdName) {
 		if err = d.shell.Exec(ctx, cmdName, args...); err != nil {
 			return err
