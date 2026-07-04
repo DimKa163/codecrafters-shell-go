@@ -73,6 +73,9 @@ func (s *shell) cd(ctx context.Context, args ...string) error {
 	}
 	if err := os.Chdir(arg); err != nil {
 		if pathErr, ok := errors.AsType[*os.PathError](err); ok && pathErr.Op == "chdir" {
+			if _, err = s.Stderr.WriteString(fmt.Sprintf("cd: %s: No such file or directory\n", arg)); err != nil {
+				return err
+			}
 			return fmt.Errorf("cd: %s: No such file or directory", arg)
 		}
 		return err
