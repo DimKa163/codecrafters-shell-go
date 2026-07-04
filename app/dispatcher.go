@@ -69,7 +69,7 @@ func (d *dipatcher) Execute(ctx context.Context) error {
 			if err = os.MkdirAll(filepath.Dir(tkn.Value), 0755); err != nil {
 				return err
 			}
-			out, err = os.OpenFile(tkn.Value, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+			out, err = os.OpenFile(tkn.Value, os.O_APPEND, 0644)
 			if err != nil {
 				return err
 			}
@@ -83,7 +83,7 @@ func (d *dipatcher) Execute(ctx context.Context) error {
 			setStderroutOverwrite = false
 			closeErr = true
 		case setStderroutAppend:
-			errOut, err = os.OpenFile(tkn.Value, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+			errOut, err = os.OpenFile(tkn.Value, os.O_APPEND, 0644)
 			if err != nil {
 				return err
 			}
