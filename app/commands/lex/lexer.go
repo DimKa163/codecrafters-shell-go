@@ -84,7 +84,11 @@ func (l *Lexer) All() iter.Seq[Token] {
 			}
 		}
 		if sb.Len() > 0 {
-			yield(Token{Value: sb.String(), Type: TokenTypeWord})
+			if !name {
+				yield(Token{Value: sb.String(), Type: TokenTypeName})
+			} else {
+				yield(Token{Value: sb.String(), Type: TokenTypeWord})
+			}
 		}
 	}
 }
