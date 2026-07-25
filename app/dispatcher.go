@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -36,6 +37,7 @@ func NewDispatcher(liner Liner) *dipatcher {
 func (d *dipatcher) Execute(ctx context.Context) error {
 	out := d.liner.Stdout()
 	errOut := d.liner.Stderr()
+	fmt.Print("$ ")
 	line, err := d.liner.Readline()
 	if err != nil {
 		return err
