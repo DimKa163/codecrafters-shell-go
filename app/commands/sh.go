@@ -18,10 +18,18 @@ const (
 	CdCommand   = "cd"
 )
 
+type writer struct {
+	io.Writer
+}
+
+func (w *writer) WriteString(p string) (n int, err error) {
+	return w.Write([]byte(p))
+}
+
 type shell struct {
 	cmd    map[string]CommandHandler
-	Stdout *os.File
-	Stderr *os.File
+	Stdout *writer
+	Stderr *writer
 }
 
 func NewShell() *shell {
@@ -41,12 +49,12 @@ func (s *shell) Check(name string) bool {
 	return ok
 }
 
-func (s *shell) SetStdout(stdout *os.File) {
-	s.Stdout = stdout
+func (s *shell) SetStdout(stdout io.Writer) {
+	s.Stdout = &writer{stdout}
 }
 
-func (s *shell) SetStderr(stderr *os.File) {
-	s.Stderr = stderr
+func (s *shell) SetStderr(stderr io.Writer) {
+	s.Stderr = &writer{stderr}
 }
 
 func (s *shell) Exec(ctx context.Context, key string, args ...string) error {

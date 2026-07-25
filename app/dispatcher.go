@@ -1,12 +1,13 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
+	"github.com/chzyer/readline"
 	"github.com/codecrafters-io/shell-starter-go/app/commands"
 	"github.com/codecrafters-io/shell-starter-go/app/commands/lex"
 )
@@ -15,33 +16,23 @@ type Shell interface {
 	Exec(ctx context.Context, key string, args ...string) error
 	ExecExternalProgram(ctx context.Context, name string, args ...string) error
 	Check(name string) bool
-	SetStdout(stdout *os.File)
-	SetStderr(stderr *os.File)
+	SetStdout(stdout io.Writer)
+	SetStderr(stderr io.Writer)
 }
 type dipatcher struct {
-	shell  Shell
-	reader bufio.Reader
+	shell Shell
+	liner *readline.Instance
 }
 
-func NewDispatcher() *dipatcher {
-	return &dipatcher{shell: commands.NewShell(), reader: *bufio.NewReader(os.Stdin)}
+func NewDispatcher(liner *readline.Instance) *dipatcher {
+	return &dipatcher{shell: commands.NewShell(), liner: liner}
 }
 
 func (d *dipatcher) Execute(ctx context.Context) error {
-	out := os.Stdout
-	errOut := os.Stderr
-	var closeOut bool
-	var closeErr bool
-	defer func() {
-		if closeOut {
-			out.Close()
-		}
-		if closeErr {
-			errOut.Close()
-		}
-	}()
+	out := d.liner.Stdout()
+	errOut := d.liner.Stderr()
 	fmt.Print("$ ")
-	line, err := d.reader.ReadString('\n')
+	line, err := d.liner.Readline()
 	if err != nil {
 		return err
 	}
@@ -64,7 +55,6 @@ func (d *dipatcher) Execute(ctx context.Context) error {
 				return err
 			}
 			setStdoutOverwrite = false
-			closeOut = true
 		case setStdoutAppend:
 			if err = os.MkdirAll(filepath.Dir(tkn.Value), 0755); err != nil {
 				return err
@@ -74,21 +64,18 @@ func (d *dipatcher) Execute(ctx context.Context) error {
 				return err
 			}
 			setStdoutAppend = false
-			closeOut = true
 		case setStderroutOverwrite:
 			errOut, err = os.OpenFile(tkn.Value, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 			if err != nil {
 				return err
 			}
 			setStderroutOverwrite = false
-			closeErr = true
 		case setStderroutAppend:
 			errOut, err = os.OpenFile(tkn.Value, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 			if err != nil {
 				return err
 			}
 			setStderroutAppend = false
-			closeErr = true
 		case tkn.Type == lex.TokenTypeName:
 			cmdName = tkn.Value
 		case tkn.Type == lex.TokenTypeRedirect:
