@@ -17,6 +17,27 @@ type ShellCompleter struct {
 func NewCompleter(stdout io.Writer, completers ...readline.PrefixCompleterInterface) *ShellCompleter {
 	paths := filepath.SplitList(os.Getenv("PATH"))
 	for _, path := range paths {
+		entries, err := os.ReadDir(path)
+		if err != nil {
+			continue
+		}
+		for _, e := range entries {
+			if e.IsDir() {
+				continue
+			}
+			info, err := e.Info()
+			if err != nil {
+				continue
+			}
+			if info.Mode().Perm()&0111 == 0 {
+				continue
+			}
+
+			completers = append(
+				completers,
+				readline.PcItem(entry.Name()),
+			)
+		}
 		path = strings.ReplaceAll(path, `\`, `/`)
 		s := strings.Split(path, `/`)
 		completers = append(completers, readline.PcItem(s[len(s)-1]))
