@@ -2,15 +2,20 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 
-	"github.com/chzyer/readline"
 	"github.com/codecrafters-io/shell-starter-go/app/commands"
 	"github.com/codecrafters-io/shell-starter-go/app/commands/lex"
 )
+
+//go:generate mockgen -source=dispatcher.go -destination=mocks/mock_dispatcher.go -package=mocks
+type Liner interface {
+	Readline() (string, error)
+	Stdout() io.Writer
+	Stderr() io.Writer
+}
 
 type Shell interface {
 	Exec(ctx context.Context, key string, args ...string) error
@@ -21,17 +26,16 @@ type Shell interface {
 }
 type dipatcher struct {
 	shell Shell
-	liner *readline.Instance
+	liner Liner
 }
 
-func NewDispatcher(liner *readline.Instance) *dipatcher {
+func NewDispatcher(liner Liner) *dipatcher {
 	return &dipatcher{shell: commands.NewShell(), liner: liner}
 }
 
 func (d *dipatcher) Execute(ctx context.Context) error {
 	out := d.liner.Stdout()
 	errOut := d.liner.Stderr()
-	fmt.Print("$ ")
 	line, err := d.liner.Readline()
 	if err != nil {
 		return err
@@ -100,7 +104,7 @@ func (d *dipatcher) Execute(ctx context.Context) error {
 	}
 
 	if err = d.shell.ExecExternalProgram(ctx, cmdName, args...); err != nil {
-
+		return err
 	}
 	return nil
 }

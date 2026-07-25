@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: '3'
+
+vars:
+  GREETING: Hello, world!
+
+tasks:
+  build:
+    cmds:
+      - go build -o ./bin/sh.exe ./app
+
+  submit:
+    cmds:
+      - codecrafters submit

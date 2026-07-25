@@ -2,6 +2,8 @@ package main
 
 import (
 	"io"
+	"os"
+	"path/filepath"
 
 	"github.com/chzyer/readline"
 )
@@ -11,7 +13,12 @@ type ShellCompleter struct {
 	stderr io.Writer
 }
 
-func NewCompleter(completer readline.AutoCompleter, stdout io.Writer) *ShellCompleter {
+func NewCompleter(stdout io.Writer, completers ...readline.PrefixCompleterInterface) *ShellCompleter {
+	paths := filepath.SplitList(os.Getenv("PATH"))
+	for _, path := range paths {
+		completers = append(completers, readline.PcItem(filepath.Base(path)))
+	}
+	completer := readline.NewPrefixCompleter(completers...)
 	return &ShellCompleter{AutoCompleter: completer, stderr: stdout}
 }
 

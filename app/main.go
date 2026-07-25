@@ -15,11 +15,9 @@ func main() {
 		HistoryFile:     "/tmp/readline.tmp",
 		InterruptPrompt: "^C",
 		AutoComplete: NewCompleter(
-			readline.NewPrefixCompleter(
-				readline.PcItem("exit"),
-				readline.PcItem("echo"),
-			),
-			os.Stdout,
+			os.Stderr,
+			readline.PcItem("exit"),
+			readline.PcItem("echo"),
 		),
 		EOFPrompt: "exit",
 		Stdin:     os.Stdin,
