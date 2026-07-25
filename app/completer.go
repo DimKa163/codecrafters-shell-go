@@ -35,7 +35,7 @@ func NewCompleter(stdout io.Writer, completers ...readline.PrefixCompleterInterf
 
 			completers = append(
 				completers,
-				readline.PcItem(entry.Name()),
+				readline.PcItem(e.Name()),
 			)
 		}
 		path = strings.ReplaceAll(path, `\`, `/`)
