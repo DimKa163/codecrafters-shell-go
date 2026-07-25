@@ -4,7 +4,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/chzyer/readline"
 )
@@ -38,9 +37,6 @@ func NewCompleter(stdout io.Writer, completers ...readline.PrefixCompleterInterf
 				readline.PcItem(e.Name()),
 			)
 		}
-		path = strings.ReplaceAll(path, `\`, `/`)
-		s := strings.Split(path, `/`)
-		completers = append(completers, readline.PcItem(s[len(s)-1]))
 	}
 	completer := readline.NewPrefixCompleter(completers...)
 	return &ShellCompleter{AutoCompleter: completer, stderr: stdout}
