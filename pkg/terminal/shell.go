@@ -102,8 +102,8 @@ func (s *Shell) PrintSuggestions() {
 	s.t.WriteString("\n")
 	s.t.WriteString(sb.String())
 	s.t.WriteString("\n")
-	s.t.WriteString(string(data))
-	s.buf.Refresh(nil)
+	s.buf.WriteRunes(data)
+	//s.buf.Refresh(nil)
 }
 
 func (s *Shell) ReadLine() string {
