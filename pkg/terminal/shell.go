@@ -95,7 +95,7 @@ func (s *Shell) PrintSuggestions() {
 	data := s.buf.Reset()
 	var sb strings.Builder
 	for _, i := range s.candidates {
-		sb.WriteString(string(i.value))
+		sb.WriteString(strings.TrimSpace(string(i.value)))
 		sb.WriteRune(' ')
 		sb.WriteRune(' ')
 	}
