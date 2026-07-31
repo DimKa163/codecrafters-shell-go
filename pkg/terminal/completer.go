@@ -47,5 +47,8 @@ func doInternal(items []*CompletableItem, r []rune, pos int) ([]*CompletableItem
 	slices.SortFunc(candidates, func(i, j *CompletableItem) int {
 		return slices.Compare(i.value, j.value)
 	})
+	candidates = slices.CompactFunc(candidates, func(i, j *CompletableItem) bool {
+		return slices.Equal(i.value, j.value)
+	})
 	return candidates, 0
 }
