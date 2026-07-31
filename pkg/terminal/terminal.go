@@ -130,6 +130,13 @@ func (t *Terminal) WriteString(s string) {
 	_ = buf.Flush()
 }
 
+func (t *Terminal) WriteStringLine(s string) {
+	buf := bufio.NewWriter(t.cfg.Stdout)
+	_, _ = buf.WriteString(s)
+	_, _ = buf.WriteString("\r\n")
+	_ = buf.Flush()
+}
+
 func (t *Terminal) Restore() error {
 	return term.Restore(int(syscall.Stdin), t.oldState)
 }

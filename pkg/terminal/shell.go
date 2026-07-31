@@ -116,8 +116,7 @@ func (s *Shell) PrintSuggestions() {
 		suggestions = append(suggestions, strings.TrimSpace(string(i.value)))
 	}
 	s.t.WriteString("\r\n")
-	s.t.WriteString(strings.Join(suggestions, "  "))
-	s.t.WriteString("\r\n")
+	s.t.WriteStringLine(strings.Join(suggestions, "  "))
 	s.buf.WriteRunes(data)
 	//s.buf.Refresh(nil)
 }
@@ -129,9 +128,6 @@ func (s *Shell) ReadLine() string {
 }
 
 func (s *Shell) WriteLine(data ...string) {
-	for _, d := range data {
-		s.t.WriteString(d)
-	}
-	s.t.WriteString("\r\n")
+	s.t.WriteStringLine(strings.Join(data, ""))
 	s.buf.Refresh(nil)
 }
