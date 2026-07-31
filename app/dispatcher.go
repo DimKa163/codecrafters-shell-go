@@ -12,7 +12,7 @@ import (
 
 //go:generate mockgen -source=dispatcher.go -destination=mocks/mock_dispatcher.go -package=mocks
 type Liner interface {
-	Readline() (string, error)
+	ReadLine() string
 	Stdout() io.Writer
 	Stderr() io.Writer
 }
@@ -34,11 +34,12 @@ func NewDispatcher(liner Liner) *dipatcher {
 }
 
 func (d *dipatcher) Execute(ctx context.Context) error {
+	var err error
 	out := d.liner.Stdout()
 	errOut := d.liner.Stderr()
-	line, err := d.liner.Readline()
-	if err != nil {
-		return err
+	line := d.liner.ReadLine()
+	if line == "" {
+		return nil
 	}
 	lexer := lex.NewLexer(line)
 	var cmdName string
