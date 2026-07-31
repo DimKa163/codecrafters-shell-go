@@ -93,15 +93,13 @@ func (s *Shell) Complete() {
 
 func (s *Shell) PrintSuggestions() {
 	data := s.buf.Reset()
-	var sb strings.Builder
+	suggestions := make([]string, 0, len(s.candidates))
 	for _, i := range s.candidates {
-		sb.WriteString(strings.TrimSpace(string(i.value)))
-		sb.WriteRune(' ')
-		sb.WriteRune(' ')
+		suggestions = append(suggestions, strings.TrimSpace(string(i.value)))
 	}
-	s.t.WriteString("\n")
-	s.t.WriteString(sb.String())
-	s.t.WriteString("\n")
+	s.t.WriteString("\r\n")
+	s.t.WriteString(strings.Join(suggestions, "  "))
+	s.t.WriteString("\r\n")
 	s.buf.WriteRunes(data)
 	//s.buf.Refresh(nil)
 }
