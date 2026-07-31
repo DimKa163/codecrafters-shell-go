@@ -82,7 +82,7 @@ func (s *Shell) Complete() {
 	}
 	if len(candidates) == 1 {
 		c := candidates[0]
-		a := c.value[len(runes):]
+		a := append(c.value[len(runes):], ' ')
 		s.buf.WriteRunes(a)
 	}
 	if len(candidates) > 1 {
