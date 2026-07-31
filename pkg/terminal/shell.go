@@ -86,9 +86,27 @@ func (s *Shell) Complete() {
 		s.buf.WriteRunes(a)
 	}
 	if len(candidates) > 1 {
+		prefix := commonPrefix(candidates)
+		if len(prefix) > len(runes) {
+			s.buf.WriteRunes(prefix[len(runes):])
+			return
+		}
 		s.t.Bell()
 		s.candidates = candidates
 	}
+}
+
+func commonPrefix(candidates []*CompletableItem) []rune {
+	if len(candidates) == 0 {
+		return nil
+	}
+	prefix := append([]rune{}, candidates[0].value...)
+	for _, c := range candidates[1:] {
+		for len(prefix) > 0 && !HasPrefix(prefix, c.value) {
+			prefix = prefix[:len(prefix)-1]
+		}
+	}
+	return prefix
 }
 
 func (s *Shell) PrintSuggestions() {
