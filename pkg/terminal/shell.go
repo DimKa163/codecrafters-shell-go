@@ -56,7 +56,7 @@ func (s *Shell) exec() {
 				s.candidates = nil
 			}
 		case CharEnter, CharCtrlJ:
-			s.t.WriteString("\n")
+			s.t.WriteString("\r\n")
 			data := s.buf.Reset()
 			s.outchan <- string(data)
 		case MetaUp:
@@ -132,6 +132,6 @@ func (s *Shell) WriteLine(data ...string) {
 	for _, d := range data {
 		s.t.WriteString(d)
 	}
-	s.t.WriteString("\n")
+	s.t.WriteString("\r\n")
 	s.buf.Refresh(nil)
 }
