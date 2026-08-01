@@ -177,8 +177,8 @@ func (s *Shell) ExecExternalProgram(ctx context.Context, name string, args ...st
 		return nil
 	}
 	cmd := exec.CommandContext(ctx, name, args...)
-	cmd.Stdout = s.cfg.Stdout
-	cmd.Stderr = s.cfg.Stderr
+	cmd.Stdout = s.t.Stdout()
+	cmd.Stderr = s.t.Stderr()
 	return cmd.Run()
 }
 
