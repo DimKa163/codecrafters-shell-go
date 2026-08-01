@@ -47,13 +47,21 @@ const (
 	MetaDown
 )
 
+type rawwriter struct {
+	io.Writer
+}
+
+func (w *rawwriter) Write(p []byte) (n int, err error) {
+	p = []byte(strings.Replace(string(p), "\n", "\r\n", -1))
+	return w.Writer.Write(p)
+}
+
 type writer struct {
 	current io.Writer
 	prev    io.Writer
 }
 
 func (w *writer) Write(p []byte) (n int, err error) {
-	p = []byte(strings.Replace(string(p), "\n", "\r\n", -1))
 	return w.current.Write(p)
 }
 
@@ -82,8 +90,8 @@ type Terminal struct {
 func New(cfg *Cfg) *Terminal {
 	t := &Terminal{
 		cfg:     cfg,
-		stdout:  &writer{current: cfg.Stdout},
-		stderr:  &writer{current: cfg.Stderr},
+		stdout:  &writer{current: &rawwriter{cfg.Stdout}},
+		stderr:  &writer{current: &rawwriter{cfg.Stderr}},
 		outchan: make(chan rune),
 	}
 	go t.exec()
