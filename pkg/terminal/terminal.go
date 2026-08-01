@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"io"
+	"strings"
 	"sync"
 	"syscall"
 	"unicode"
@@ -52,6 +53,7 @@ type writer struct {
 }
 
 func (w *writer) Write(p []byte) (n int, err error) {
+	p = []byte(strings.Replace(string(p), "\n", "\r\n", -1))
 	return w.current.Write(p)
 }
 
@@ -160,14 +162,14 @@ func (t *Terminal) WriteString(s string) {
 func (t *Terminal) WriteStringLine(s string) {
 	buf := bufio.NewWriter(t.stdout)
 	_, _ = buf.WriteString(s)
-	_, _ = buf.WriteString("\r\n")
+	_, _ = buf.WriteString("\n")
 	_ = buf.Flush()
 }
 
 func (t *Terminal) WriteErrorStringLine(s string) {
 	buf := bufio.NewWriter(t.stderr)
 	_, _ = buf.WriteString(s)
-	_, _ = buf.WriteString("\r\n")
+	_, _ = buf.WriteString("\n")
 	_ = buf.Flush()
 }
 

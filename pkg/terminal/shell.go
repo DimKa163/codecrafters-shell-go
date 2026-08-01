@@ -27,6 +27,8 @@ type Shell struct {
 	outchan      chan string
 	buf          *RuneBuffer
 	inSelectMode bool
+	stdout       io.Writer
+	stderr       io.Writer
 	candidates   []*CompletableItem
 }
 
@@ -148,7 +150,7 @@ func (s *Shell) PrintSuggestions() {
 	for _, i := range s.candidates {
 		suggestions = append(suggestions, strings.TrimSpace(string(i.value)))
 	}
-	s.t.WriteString("\r\n")
+	s.t.WriteString("\n")
 	s.t.WriteStringLine(strings.Join(suggestions, "  "))
 	s.buf.WriteRunes(data)
 	//s.buf.Refresh(nil)
