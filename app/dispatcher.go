@@ -6,8 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/codecrafters-io/shell-starter-go/app/commands"
-	"github.com/codecrafters-io/shell-starter-go/app/commands/lex"
+	"github.com/codecrafters-io/shell-starter-go/pkg/terminal"
 )
 
 //go:generate mockgen -source=dispatcher.go -destination=mocks/mock_dispatcher.go -package=mocks
@@ -15,33 +14,31 @@ type Liner interface {
 	ReadLine() string
 	Stdout() io.Writer
 	Stderr() io.Writer
-}
-
-type Shell interface {
 	Exec(ctx context.Context, key string, args ...string) error
 	ExecExternalProgram(ctx context.Context, name string, args ...string) error
 	Check(name string) bool
 	SetStdout(stdout io.Writer)
 	SetStderr(stderr io.Writer)
+	ResetOutput()
 }
 type dipatcher struct {
-	shell Shell
 	liner Liner
 }
 
 func NewDispatcher(liner Liner) *dipatcher {
-	return &dipatcher{shell: commands.NewShell(), liner: liner}
+	return &dipatcher{liner: liner}
 }
 
 func (d *dipatcher) Execute(ctx context.Context) error {
 	var err error
+	defer d.liner.ResetOutput()
 	out := d.liner.Stdout()
 	errOut := d.liner.Stderr()
 	line := d.liner.ReadLine()
 	if line == "" {
 		return nil
 	}
-	lexer := lex.NewLexer(line)
+	lexer := terminal.NewLexer(line)
 	var cmdName string
 	args := make([]string, 0)
 
@@ -81,30 +78,30 @@ func (d *dipatcher) Execute(ctx context.Context) error {
 				return err
 			}
 			setStderroutAppend = false
-		case tkn.Type == lex.TokenTypeName:
+		case tkn.Type == terminal.TokenTypeName:
 			cmdName = tkn.Value
-		case tkn.Type == lex.TokenTypeRedirect:
+		case tkn.Type == terminal.TokenTypeRedirect:
 			setStdoutOverwrite = true
-		case tkn.Type == lex.TokenTypeErrorRedirect:
+		case tkn.Type == terminal.TokenTypeErrorRedirect:
 			setStderroutOverwrite = true
-		case tkn.Type == lex.TokenTypeRedirectAppend:
+		case tkn.Type == terminal.TokenTypeRedirectAppend:
 			setStdoutAppend = true
-		case tkn.Type == lex.TokenTypeErrorRedirectAppend:
+		case tkn.Type == terminal.TokenTypeErrorRedirectAppend:
 			setStderroutAppend = true
-		case tkn.Type == lex.TokenTypeWord:
+		case tkn.Type == terminal.TokenTypeWord:
 			args = append(args, tkn.Value)
 		}
 	}
-	d.shell.SetStdout(out)
-	d.shell.SetStderr(errOut)
-	if d.shell.Check(cmdName) {
-		if err = d.shell.Exec(ctx, cmdName, args...); err != nil {
+	d.liner.SetStdout(out)
+	d.liner.SetStderr(errOut)
+	if d.liner.Check(cmdName) {
+		if err = d.liner.Exec(ctx, cmdName, args...); err != nil {
 			return err
 		}
 		return nil
 	}
 
-	if err = d.shell.ExecExternalProgram(ctx, cmdName, args...); err != nil {
+	if err = d.liner.ExecExternalProgram(ctx, cmdName, args...); err != nil {
 		return err
 	}
 	return nil

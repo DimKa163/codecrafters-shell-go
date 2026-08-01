@@ -11,14 +11,14 @@ type RuneBuffer struct {
 	length    int
 	rw        sync.RWMutex
 	delta     int
-	cfg       Cfg
+	cfg       *Cfg
 	buf       []rune
 	idx       int
 	line      int
 	totalLine int
 }
 
-func NewBuffer(cfg Cfg) *RuneBuffer {
+func NewBuffer(cfg *Cfg) *RuneBuffer {
 	return &RuneBuffer{cfg: cfg}
 }
 

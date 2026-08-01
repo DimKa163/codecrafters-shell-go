@@ -56,7 +56,7 @@ func main() {
 		}
 	}
 	completer := terminal.NewCompleter(completers...)
-	cfg := terminal.Cfg{
+	cfg := &terminal.Cfg{
 		Prompt:    []rune("$ "),
 		Completer: completer,
 		Stdin:     os.Stdin,

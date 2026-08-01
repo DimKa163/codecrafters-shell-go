@@ -1,4 +1,4 @@
-package lex
+package terminal
 
 import (
 	"iter"

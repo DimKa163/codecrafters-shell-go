@@ -3,6 +3,7 @@ package terminal
 import (
 	"bufio"
 	"bytes"
+	"io"
 	"sync"
 	"syscall"
 	"unicode"
@@ -45,16 +46,42 @@ const (
 	MetaDown
 )
 
+type writer struct {
+	current io.Writer
+	prev    io.Writer
+}
+
+func (w *writer) Write(p []byte) (n int, err error) {
+	return w.current.Write(p)
+}
+
+func (w *writer) SetWriter(wr io.Writer) {
+	w.prev = w.current
+	w.current = wr
+}
+
+func (w *writer) Reset() {
+	if w.prev == nil {
+		return
+	}
+	w.current = w.prev
+	w.prev = nil
+}
+
 type Terminal struct {
-	cfg      Cfg
+	cfg      *Cfg
 	wg       sync.WaitGroup
 	outchan  chan rune
 	oldState *term.State
+	stdout   *writer
+	stderr   *writer
 }
 
-func New(cfg Cfg) *Terminal {
+func New(cfg *Cfg) *Terminal {
 	t := &Terminal{
 		cfg:     cfg,
+		stdout:  &writer{current: cfg.Stdout},
+		stderr:  &writer{current: cfg.Stderr},
 		outchan: make(chan rune),
 	}
 	go t.exec()
@@ -102,7 +129,7 @@ func (t *Terminal) exec() {
 }
 
 func (t *Terminal) Bell() {
-	buf := bufio.NewWriter(t.cfg.Stdout)
+	buf := bufio.NewWriter(t.stdout)
 	_, _ = buf.WriteString("\x07")
 	_ = buf.Flush()
 }
@@ -125,16 +152,42 @@ func (t *Terminal) ReadRune() rune {
 }
 
 func (t *Terminal) WriteString(s string) {
-	buf := bufio.NewWriter(t.cfg.Stdout)
+	buf := bufio.NewWriter(t.stdout)
 	_, _ = buf.WriteString(s)
 	_ = buf.Flush()
 }
 
 func (t *Terminal) WriteStringLine(s string) {
-	buf := bufio.NewWriter(t.cfg.Stdout)
+	buf := bufio.NewWriter(t.stdout)
 	_, _ = buf.WriteString(s)
 	_, _ = buf.WriteString("\r\n")
 	_ = buf.Flush()
+}
+
+func (t *Terminal) WriteErrorStringLine(s string) {
+	buf := bufio.NewWriter(t.stderr)
+	_, _ = buf.WriteString(s)
+	_, _ = buf.WriteString("\r\n")
+	_ = buf.Flush()
+}
+
+func (t *Terminal) Stdout() io.Writer {
+	return t.stdout
+}
+
+func (t *Terminal) Stderr() io.Writer {
+	return t.stderr
+}
+func (t *Terminal) SetStdout(stdout io.Writer) {
+	t.stdout.SetWriter(stdout)
+}
+
+func (t *Terminal) SetStderr(stderr io.Writer) {
+	t.stderr.SetWriter(stderr)
+}
+func (t *Terminal) Reset() {
+	t.stdout.Reset()
+	t.stderr.Reset()
 }
 
 func (t *Terminal) Restore() error {

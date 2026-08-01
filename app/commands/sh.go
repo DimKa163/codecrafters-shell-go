@@ -8,6 +8,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/codecrafters-io/shell-starter-go/pkg/terminal"
 )
 
 const (
@@ -27,14 +29,14 @@ func (w *writer) WriteString(p string) (n int, err error) {
 }
 
 type shell struct {
-	cmd    map[string]CommandHandler
+	cmd    map[string]terminal.CommandHandler
 	Stdout *writer
 	Stderr *writer
 }
 
 func NewShell() *shell {
 	s := &shell{}
-	cmd := make(map[string]CommandHandler, 4)
+	cmd := make(map[string]terminal.CommandHandler, 4)
 	cmd[EchoCommand] = s.echo
 	cmd[ExitCommand] = s.exit
 	cmd[TypeCommand] = s.check
