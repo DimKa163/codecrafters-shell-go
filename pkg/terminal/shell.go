@@ -181,6 +181,10 @@ func (s *Shell) ExecExternalProgram(ctx context.Context, name string, args ...st
 	cmd := exec.CommandContext(ctx, name, args...)
 	cmd.Stdout = s.t.Stdout()
 	cmd.Stderr = s.t.Stderr()
+	if err = s.t.Restore(); err != nil {
+		return err
+	}
+	defer s.t.MakeRaw()
 	return cmd.Run()
 }
 
