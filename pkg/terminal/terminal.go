@@ -52,7 +52,9 @@ type rawwriter struct {
 }
 
 func (w *rawwriter) Write(p []byte) (n int, err error) {
+	print("rawwriter")
 	p = []byte(strings.Replace(string(p), "\n", "\r\n", -1))
+	print("rawwriter", string(p))
 	return w.wr.Write(p)
 }
 
