@@ -48,12 +48,12 @@ const (
 )
 
 type rawwriter struct {
-	io.Writer
+	wr io.Writer
 }
 
 func (w *rawwriter) Write(p []byte) (n int, err error) {
 	p = []byte(strings.Replace(string(p), "\n", "\r\n", -1))
-	return w.Writer.Write(p)
+	return w.wr.Write(p)
 }
 
 type writer struct {
